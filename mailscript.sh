@@ -38,3 +38,4 @@ echo "smtpd_tls_session_cache_timeout = 3600s" >> /etc/postfix/main.cf
 echo "tls_random_source = dev:/dev/urandom" >> /etc/postfix/main.cf
 
 echo "http://www.krizna.com/centos/setup-mail-server-in-centos-6/"
+echo "step 5"
