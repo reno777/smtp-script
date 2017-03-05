@@ -72,6 +72,7 @@ echo 'COMMIT' >> /etc/sysconfig/iptables
 
 systemctl stop firewalld
 systemctl disable firewalld
+systemctl enable iptables
 systemctl restart iptables
 systemctl status iptables
 sleep 5
