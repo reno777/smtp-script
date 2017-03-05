@@ -57,6 +57,13 @@ echo '    }' >> /etc/dovecot/dovecot.conf
 echo '}' >> /etc/dovecot/dovecot.conf
 echo 'ssl = no' >> /etc/dovecot/dovecot.conf
 
+systemctl stop firewalld
+systemctl disable firewalld
+systemctl enable iptables
+systemctl restart iptables
+systemctl status iptables
+sleep 5
+
 #iptables
 mv /etc/sysconfig/itpables /etc/sysconfig/iptables.bak
 touch /etc/sysconfig/iptables
@@ -70,12 +77,12 @@ echo '-A INPUT -m state --state NEW -m tcp -p tcp --dport 143 -j ACCEPT' >> /etc
 echo '-A INPUT -j REJECT' >> /etc/sysconfig/iptables
 echo 'COMMIT' >> /etc/sysconfig/iptables
 
-systemctl stop firewalld
-systemctl disable firewalld
-systemctl enable iptables
-systemctl restart iptables
-systemctl status iptables
-sleep 5
+#systemctl stop firewalld
+#systemctl disable firewalld
+#systemctl enable iptables
+#systemctl restart iptables
+#systemctl status iptables
+#sleep 5
 
 #chkconfig/network
 chkconfig network on
