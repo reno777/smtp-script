@@ -72,7 +72,7 @@ echo '*filter' > /etc/sysconfig/iptables
 echo ':INPUT DROP [0:0]' >> /etc/sysconfig/iptables
 echo ':FORWARD DROP [0:0]' >> /etc/sysconfig/iptables
 echo ':OUTPUT ACCEPT [0:0]' >> /etc/sysconfig/iptables
-echo '-A INPUT -m state --state ESTABLSIHED,RELATED -j ACCEPT' >> /etc/sysconfig/iptables
+echo '-A INPUT -m state --state RELATAED,ESTABLISHED -j ACCEPT' >> /etc/sysconfig/iptables
 echo '-A INPUT -m state --state NEW -m tcp -p tcp --dport 25 -j ACCEPT' >> /etc/sysconfig/iptables
 echo '-A INPUT -m state --state NEW -m tcp -p tcp --dport 143 -j ACCEPT' >> /etc/sysconfig/iptables
 echo '-A INPUT -j REJECT' >> /etc/sysconfig/iptables
