@@ -1,5 +1,5 @@
 !#/bin/bash
-yum install ngrep iproute iptables iptables-services -y
+yum install ngrep iproute iptables iptables-services nano -y
 mv /etc/postfix/main.cf /etc/postfix/main.cf.bak
 mv /etc/dovecot/dovecot.conf /etc/dovecot/dovecot.conf.bak
 touch /etc/postfix/main.cf
