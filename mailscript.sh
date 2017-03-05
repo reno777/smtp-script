@@ -1,41 +1,62 @@
 !#/bin/bash
-yum install postfix -y
-yum -y install cyrus-sasl cyrus-sasl-devel cyrus-sasl-gssapi cyrus-sasl-md5 cyrus-sasl-plain
-mkdir /etc/postfix/ssl
-cd /etc/postfix/ssl
-openssl genrsa -des3 -rand /etc/hosts -out smtpd.key 1024
-chmod 600 smtpd.key
-openssl req -new -key smtpd.key -out smtpd.csr
-openssl x509 -req -days 365 -in smtpd.csr -signkey smtpd.key -out smtpd.crt
-openssl rsa -in smtpd.key -out smtpd.key.unencrypted
-mv -f smtpd.key.unencrypted smtpd.key
-openssl req -new -x509 -extensions v3_ca -keyout cakey.pem -out cacert.pem -days 365
+yum install ngrep iproute iptables iptables-services -y
+mv /etc/postfix/main.cf /etc/postfix/main.cf.bak
+mv /etc/dovecot/dovecot.conf /etc/dovecot/dovecot.conf.bak
+touch /etc/postfix/main.cf
+touch /etc/dovecot/dovecot.conf
 
-sed -i 's/^inet_interfaces = localhost/#inet_interfaces = localhost/' /etc/postfix/main.cf
+#postfix/main.conf
+echo 'smptd banner = hostname.$mydomain mail server' >> /etc/postfix/main.cf
+echo 'biff = no' >> /etc/postfix/main.cf
+echo 'append_dot_mydomain = yes' >> /etc/postfix/main.cf
+echo 'readme_directory = no' >> /etc/postfix/main.cf
+echo 'smtpd_sasl_auth_enable = yes' >> /etc/postfix/main.cf
+echo 'smtpd_sasl_path = private/auth' >> /etc/postfix/main.cf
+echo 'smtpd_sasl_type = dovecot' >> /etc/postfix/main.cf
+echo 'smtpd_recipient_restrictions = permit_mynetworks permit_sasl_authenticated reject_unauth_destination' >> /etc/postfix/main.cf
+echo 'myhostname = mail' >> /etc/postfix/main.cf
+echo 'mydomain = corp.australia.ists' >> /etc/postfix/main.cf
+echo 'alias_maps = hash:/etc/aliases' >> /etc/postfix/main.cf
+echo 'alias_database = hash:/etc/aliases' >> /etc/postfix/main.cf
+echo 'myorigin = /etc/mailname' >> /etc/postfix/main.cf
+echo 'mydestination = mail.$mydomain, $mydomain, localhost.localdomain, localhost' >> /etc/postfix/main.cf
+echo 'relayhost = ' >> /etc/postfix/main.cf
+echo 'mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128' >> /etc/postfix/main.cf
+echo 'mailbox_size_limit = 0' >> /etc/postfix/main.cf
+echo 'recipient_delimiter = +' >> /etc/postfix/main.cf
+echo 'inet_interfaces = all' >> /etc/postfix/main.cf
+echo 'inet_protocols = all' >> /etc/postfix/main.cf
 
-echo "myhostname = mail.test.com" >> /etc/postfix/main.cf
-echo "mydomain = test.com" >> /etc/postfix/main.cf
-echo "myorigin = $mydomain" >> /etc/postfix/main.cf
-echo "home_mailbox = mail/" >> /etc/postfix/main.cf
-echo "mynetworks = 127.0.0.0/8" >> /etc/postfix/main.cf
-echo "inet_interfaces = all" >> /etc/postfix/main.cf
-echo "mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain" >> /etc/postfix/main.cf
-echo "smtpd_sasl_auth_enable = yes" >> /etc/postfix/main.cf
-echo "smtpd_sasl_type = cyrus" >> /etc/postfix/main.cf
-echo "smtpd_sasl_security_options = noanonymous" >> /etc/postfix/main.cf
-echo "broken_sasl_auth_clients = yes" >> /etc/postfix/main.cf
-echo "smtpd_sasl_authenticated_header = yes" >> /etc/postfix/main.cf
-echo "smtpd_recipient_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination" >> /etc/postfix/main.cf
-echo "smtpd_tls_auth_only = no" >> /etc/postfix/main.cf
-echo "smtp_use_tls = yes" >> /etc/postfix/main.cf
-echo "smtpd_use_tls = yes" >> /etc/postfix/main.cf
-echo "smtp_tls_note_starttls_offer = yes" >> /etc/postfix/main.cf
-echo "smtpd_tls_key_file = /etc/postfix/ssl/smtpd.key" >> /etc/postfix/main.cf
-echo "smtpd_tls_cert_file = /etc/postfix/ssl/smtpd.crt" >> /etc/postfix/main.cf
-echo "smtpd_tls_CAfile = /etc/postfix/ssl/cacert.pem" >> /etc/postfix/main.cf
-echo "smtpd_tls_received_header = yes" >> /etc/postfix/main.cf
-echo "smtpd_tls_session_cache_timeout = 3600s" >> /etc/postfix/main.cf
-echo "tls_random_source = dev:/dev/urandom" >> /etc/postfix/main.cf
+#dovecot/dovecot.conf
+echo 'disable_plaintext_auth = no' >> /etc/dovecot/dovecot.conf
+echo 'mail_privileged_group = mail' >> /etc/dovecot/dovecot.conf
+echo 'mail_location = mbox:~/mail:INBOX=/var/mail/%u' >> /etc/dovecot/dovecot.conf
+echo 'auth_mechanisms = plain login' >> /etc/dovecot/dovecot.conf
+echo 'userdb {' >> /etc/dovecot/dovecot.conf
+echo '    driver = passwd' >> /etc/dovecot/dovecot.conf
+echo '}' >> /etc/dovecot/dovecot.conf
+echo 'passdb {' >> /etc/dovecot/dovecot.conf
+echo '    driver = pam' >> /etc/dovecot/dovecot.conf
+echo '}' >> /etc/dovecot/dovecot.conf
+echo 'protocols = imap pop3' >> /etc/dovecot/dovecot.conf
+echo 'protocol imap {' >> /etc/dovecot/dovecot.conf
+echo '    mail_plugins = " autocreate"' >> /etc/dovecot/dovecot.conf
+echo '}' >> /etc/dovecot/dovecot.conf
+echo 'plugin {' >> /etc/dovecot/dovecot.conf
+echo '    autocreate = Trash' >> /etc/dovecot/dovecot.conf
+echo '    autocreate2 = Sent' >> /etc/dovecot/dovecot.conf
+echo '    autosubscribe = Trash' >> /etc/dovecot/dovecot.conf
+echo '    autosubscribe2 = Sent' >> /etc/dovecot/dovecot.conf
+echo '}' >> /etc/dovecot/dovecot.conf
+echo 'service auth {' >> /etc/dovecot/dovecot.conf
+echo '    unix_listener /var/spool/postfix/private/auth {' >> /etc/dovecot/dovecot.conf
+echo '        group = postfix' >> /etc/dovecot/dovecot.conf
+echo '        mode = 0660' >> /etc/dovecot/dovecot.conf
+echo '        user = postfix' >> /etc/dovecot/dovecot.conf
+echo '    }' >> /etc/dovecot/dovecot.conf
+echo '}' >> /etc/dovecot/dovecot.conf
+echo 'ssl = no' >> /etc/dovecot/dovecot.conf
 
-echo "http://www.krizna.com/centos/setup-mail-server-in-centos-6/"
-echo "step 5"
+
+systemctl stop firewalld
+systemctl disable firewalld
