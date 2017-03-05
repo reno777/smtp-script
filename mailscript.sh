@@ -80,13 +80,14 @@ echo 'COMMIT' >> /etc/sysconfig/iptables
 #systemctl stop firewalld
 #systemctl disable firewalld
 #systemctl enable iptables
-#systemctl restart iptables
-#systemctl status iptables
-#sleep 5
+systemctl restart iptables
+systemctl status iptables
+sleep 5
 
 #chkconfig/network
 chkconfig network on
 systemctl restart network
+systemctl status network
 sleep 5
 
 #end
