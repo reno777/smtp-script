@@ -83,5 +83,4 @@ systemctl restart network
 sleep 5
 
 #end
-gnome-terminal
 ngrep -d any port 25
